@@ -7,13 +7,9 @@
     "strictNullChecks": true,
     "jsx": "react",
     "jsxFactory": "createElement",
-    "noEmitHelpers": true,
     "importHelpers": true
   },
   "include": [
     "./src/**/*"
-  ],
-  "exclude": [
-    "**/*/__tests__/*"
   ]
 }

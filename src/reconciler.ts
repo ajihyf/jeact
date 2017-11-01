@@ -1,15 +1,7 @@
-export interface Element {
-  type: string,
-  props: {
-    children?: Element[],
-    [key: string]: any
-  }
-}
+import { TEXT_ELEMENT, Element } from './element';
 
 const isListener = (attr: string) => attr.startsWith('on');
 const isAttribute = (attr: string) => attr !== 'children' && !isListener(attr);
-
-export const TEXT_ELEMENT = 'TEXT_ELEMENT';
 const isTextElement = (type: string) => type === TEXT_ELEMENT;
 
 export function render(element: Element, parentDOM: HTMLElement) {

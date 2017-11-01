@@ -1,4 +1,5 @@
-import { Element, render, TEXT_ELEMENT } from '../src/reconciler';
+import { Element, TEXT_ELEMENT } from '../src/element';
+import { render } from '../src/reconciler';
 
 let root: HTMLElement;
 
@@ -57,4 +58,17 @@ it('renders a text node', () => {
   };
   render(element, root);
   expect(root.innerHTML).toBe('<div>hello world</div>');
+});
+
+it('renders a text node with num', () => {
+  const element = {
+    type: 'div',
+    props: {
+      children: [
+        { type: TEXT_ELEMENT, props: { nodeValue: 233 } }
+      ]
+    }
+  };
+  render(element, root);
+  expect(root.innerHTML).toBe('<div>233</div>');
 });
