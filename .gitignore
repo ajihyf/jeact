@@ -1,0 +1,10 @@
+*~
+.DS_Store
+*.pyc
+.idea/
+
+node_modules/
+coverage
+
+src/**/*.js
+src/**/*.js.map
