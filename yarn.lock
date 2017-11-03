@@ -6,6 +6,10 @@
   version "21.1.5"
   resolved "http://registry.npm.taobao.org/@types/jest/download/@types/jest-21.1.5.tgz#3db93d069d12602ca115d3604550e15131d8eb7a"
 
+"@types/lodash@^4.14.80":
+  version "4.14.80"
+  resolved "http://registry.npm.taobao.org/@types/lodash/download/@types/lodash-4.14.80.tgz#a6b8b7900e6a7dcbc2e90d9b6dfbe3f6a7f69951"
+
 abab@^1.0.3:
   version "1.0.4"
   resolved "http://registry.npm.taobao.org/abab/download/abab-1.0.4.tgz#5faad9c2c07f60dd76770f71cf025b62a63cfd4e"
@@ -1915,6 +1919,10 @@ preserve@^0.2.0:
   version "0.2.0"
   resolved "http://registry.npm.taobao.org/preserve/download/preserve-0.2.0.tgz#815ed1f6ebc65926f865b310c0713bcb3315ce4b"
 
+prettier@^1.7.4:
+  version "1.7.4"
+  resolved "http://registry.npm.taobao.org/prettier/download/prettier-1.7.4.tgz#5e8624ae9363c80f95ec644584ecdf55d74f93fa"
+
 pretty-format@^21.2.1:
   version "21.2.1"
   resolved "http://registry.npm.taobao.org/pretty-format/download/pretty-format-21.2.1.tgz#ae5407f3cf21066cd011aa1ba5fce7b6a2eddb36"
@@ -2424,6 +2432,12 @@ tslint-config-prettier@^1.6.0:
   version "1.6.0"
   resolved "http://registry.npm.taobao.org/tslint-config-prettier/download/tslint-config-prettier-1.6.0.tgz#fec1ee8fb07e8f033c63fed6b135af997f31962a"
 
+tslint-react@^3.2.0:
+  version "3.2.0"
+  resolved "http://registry.npm.taobao.org/tslint-react/download/tslint-react-3.2.0.tgz#851fb505201c63d0343c51726e6364f7e9ad2e99"
+  dependencies:
+    tsutils "^2.8.0"
+
 tslint@^5.8.0:
   version "5.8.0"
   resolved "http://registry.npm.taobao.org/tslint/download/tslint-5.8.0.tgz#1f49ad5b2e77c76c3af4ddcae552ae4e3612eb13"
@@ -2440,7 +2454,7 @@ tslint@^5.8.0:
     tslib "^1.7.1"
     tsutils "^2.12.1"
 
-tsutils@^2.12.1:
+tsutils@^2.12.1, tsutils@^2.8.0:
   version "2.12.1"
   resolved "http://registry.npm.taobao.org/tsutils/download/tsutils-2.12.1.tgz#f4d95ce3391c8971e46e54c4cf0edb0a21dd5b24"
   dependencies:

@@ -1,16 +1,11 @@
-import { createElement } from '../src/element';
 import { render } from '../src/reconciler';
+import { h } from '../src/vnode';
 
 let root: HTMLElement;
 
-beforeEach(() => {
+beforeAll(() => {
   root = document.createElement('div');
   document.body.appendChild(root);
-});
-
-afterEach(() => {
-  root.innerHTML = '';
-  document.body.removeChild(root);
 });
 
 it('renders a jsx div', () => {
@@ -20,13 +15,18 @@ it('renders a jsx div', () => {
 });
 
 it('renders a jsx with attrs', () => {
-  const element = <div className="hello" />;
+  const element = <div attrs={{ align: 'left' }} />;
   render(element, root);
-  expect(root.innerHTML).toBe('<div class="hello"></div>');
+  expect(root.innerHTML).toBe('<div align="left"></div>');
 });
 
 it('renders a div with children', () => {
-  const element = <div><span /><div id="hello" /></div>;
+  const element = (
+    <div>
+      <span />
+      <div attrs={{ id: 'hello' }} />
+    </div>
+  );
   render(element, root);
   expect(root.innerHTML).toBe('<div><span></span><div id="hello"></div></div>');
 });
@@ -36,7 +36,6 @@ it('renders a text node', () => {
   render(element, root);
   expect(root.innerHTML).toBe('<div>hello world</div>');
 });
-
 
 it('renders a text node with num', () => {
   const element = <div>233</div>;

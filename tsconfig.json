@@ -3,13 +3,12 @@
     "target": "es2017",
     "module": "commonjs",
     "moduleResolution": "node",
-    "outDir": "./build/",
     "strictNullChecks": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
     "jsx": "react",
-    "jsxFactory": "createElement",
+    "jsxFactory": "h",
     "importHelpers": true
   },
-  "include": [
-    "./src/**/*"
-  ]
+  "include": ["./src/**/*"]
 }

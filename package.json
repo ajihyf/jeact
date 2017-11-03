@@ -6,20 +6,25 @@
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "^21.1.5",
+    "@types/lodash": "^4.14.80",
     "jest": "^21.2.1",
+    "prettier": "^1.7.4",
     "rimraf": "^2.6.2",
     "rollup": "^0.50.0",
     "rollup-plugin-typescript2": "^0.8.0",
     "ts-jest": "^21.1.4",
     "tslint": "^5.8.0",
     "tslint-config-prettier": "^1.6.0",
+    "tslint-react": "^3.2.0",
     "typescript": "^2.5.3"
   },
   "dependencies": {
+    "lodash": "^4.17.4",
     "tslib": "^1.8.0"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "pretty": "prettier --write \"{src,__{tests,mocks}__}/**/*.{ts,tsx}\" \"./*.{json,js}\""
   },
   "jest": {
     "collectCoverage": true,
@@ -38,5 +43,8 @@
       "js"
     ],
     "mapCoverage": true
+  },
+  "prettier": {
+    "singleQuote": true
   }
 }

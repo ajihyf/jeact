@@ -1,74 +1,69 @@
-import { Element, TEXT_ELEMENT } from '../src/element';
 import { render } from '../src/reconciler';
+import { VNode } from '../src/vnode';
 
 let root: HTMLElement;
 
-beforeEach(() => {
+beforeAll(() => {
   root = document.createElement('div');
   document.body.appendChild(root);
 });
 
-afterEach(() => {
-  root.innerHTML = '';
-  document.body.removeChild(root);
-});
-
 it('renders a div', () => {
-  const element = {
-    type: 'div',
-    props: {}
+  const element: VNode = {
+    type: 'div'
   };
   render(element, root);
   expect(root.innerHTML).toBe('<div></div>');
 });
 
 it('renders a div with props', () => {
-  const element = {
+  const element: VNode = {
     type: 'div',
-    props: {
-      className: 'happy'
+    data: {
+      class: { hello: true, world: false },
+      attrs: {
+        align: 'left'
+      }
     }
   };
   render(element, root);
-  expect(root.innerHTML).toBe('<div class="happy"></div>');
+  expect(root.innerHTML).toBe('<div class="hello" align="left"></div>');
 });
 
 it('renders a div with children', () => {
-  const element = {
+  const element: VNode = {
     type: 'div',
-    props: {
-      children: [
-        { type: 'span', props: {} },
-        { type: 'div', props: { id: 'hello' } }
-      ]
-    }
+    children: [
+      { type: 'span' },
+      { type: 'div', data: { attrs: { id: 'hello' } } }
+    ]
   };
   render(element, root);
   expect(root.innerHTML).toBe('<div><span></span><div id="hello"></div></div>');
 });
 
 it('renders a text node', () => {
-  const element = {
+  const element: VNode = {
     type: 'div',
-    props: {
-      children: [
-        { type: TEXT_ELEMENT, props: { nodeValue: 'hello world' } }
-      ]
-    }
+    children: [{ text: 'hello world' }]
   };
   render(element, root);
   expect(root.innerHTML).toBe('<div>hello world</div>');
 });
 
-it('renders a text node with num', () => {
-  const element = {
+it('renders a node with event listener', () => {
+  const element: VNode = {
     type: 'div',
-    props: {
-      children: [
-        { type: TEXT_ELEMENT, props: { nodeValue: 233 } }
-      ]
+    data: {
+      attrs: {
+        id: 'root'
+      },
+      on: {
+        click: jest.fn()
+      }
     }
   };
   render(element, root);
-  expect(root.innerHTML).toBe('<div>233</div>');
+  document.getElementById('root').click();
+  expect(element.data.on.click).toHaveBeenCalledTimes(1);
 });

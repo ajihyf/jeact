@@ -1,18 +1,17 @@
 {
-  "extends": [
-    "tslint-config-prettier"
-  ],
+  "extends": ["tslint:latest", "tslint-react", "tslint-config-prettier"],
   "rules": {
     "class-name": true,
-    "curly": true,
+    "curly": [true, "ignore-same-line"],
     "eofline": true,
     "no-duplicate-variable": true,
     "no-var-keyword": true,
     "prefer-const": true,
     "triple-equals": true,
-    "no-unused-expression": [
-      true,
-      "allow-new"
-    ]
+    "interface-name": false,
+    "forin": false,
+    "object-literal-sort-keys": false,
+    "quotemark": [true, "single", "jsx-double"],
+    "no-unused-expression": [true, "allow-new"]
   }
 }
