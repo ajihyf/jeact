@@ -36,9 +36,3 @@ it('renders a text node', () => {
   render(element, root);
   expect(root.innerHTML).toBe('<div>hello world</div>');
 });
-
-it('renders a text node with num', () => {
-  const element = <div>233</div>;
-  render(element, root);
-  expect(root.innerHTML).toBe('<div>233</div>');
-});
