@@ -8,3 +8,5 @@ coverage
 
 src/**/*.js
 src/**/*.js.map
+
+.rpt2_cache

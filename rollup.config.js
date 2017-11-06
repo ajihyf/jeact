@@ -2,7 +2,7 @@
 import typescript from 'rollup-plugin-typescript2';
 
 export default {
-  entry: 'src/jeact.ts',
+  input: 'src/jeact.ts',
 
   plugins: [typescript(/*{ plugin options }*/)]
 };

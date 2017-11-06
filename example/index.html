@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jeact - Hello World</title>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script src="https://unpkg.com/lodash"></script>
+  <script>
+    lodash = _;
+  </script>
+  <script src="../dist/jeact.umd.js"></script>
+  <script>
+    const root = document.getElementById("root");
+    class App extends jeact.Component {
+      render() {
+        return jeact.h("div", null, `Hello ${this.props.name}!`);
+      }
+    }
+    const element = jeact.h(App, { name: "World" });
+    jeact.render(element, root);
+  </script>
+</body>
+
+</html>
