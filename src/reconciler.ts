@@ -1,13 +1,16 @@
 import { isNil } from 'lodash';
+import { Component, createPublicInstance } from './component';
 import { updateAttrs } from './modules/attrs';
 import { updateClass } from './modules/class';
 import { updateListener } from './modules/eventlistener';
 import { isVComplexNode, VComplexNode, VNode, VNodeData } from './vnode';
 
-interface Instance {
+export interface Instance {
   dom: Node;
   element: VNode;
+  childInstance?: Instance;
   childInstances?: Instance[];
+  publicInstance?: Component<any, any>;
 }
 
 let rootInstance: Instance | null;
@@ -18,7 +21,7 @@ export function render(element: VNode, parentDOM: HTMLElement) {
   rootInstance = nextInstance;
 }
 
-function reconcile(
+export function reconcile(
   parentDOM: HTMLElement,
   instance: Instance | undefined | null,
   element: VNode | undefined | null
@@ -38,10 +41,25 @@ function reconcile(
     isVComplexNode(element) &&
     instance.element.type === element.type
   ) {
-    updateDOM(instance.dom as HTMLElement, instance.element.data, element.data);
-    instance.element = element;
-    instance.childInstances = reconcileChildren(instance, element);
-    return instance;
+    if (typeof element.type === 'string') {
+      updateDOM(
+        instance.dom as HTMLElement,
+        instance.element.data,
+        element.data
+      );
+      instance.element = element;
+      instance.childInstances = reconcileChildren(instance, element);
+      return instance;
+    } else {
+      instance.publicInstance!.props = element.data;
+      const childElement = instance.publicInstance!.render();
+      const oldInstance = instance.childInstance!;
+      const newInstance = reconcile(parentDOM, oldInstance, childElement);
+      instance.dom = newInstance!.dom;
+      instance.childInstance = newInstance!;
+      instance.element = element;
+      return instance;
+    }
   } else {
     const newInstance = instantiate(element);
     parentDOM.replaceChild(newInstance.dom, instance.dom);
@@ -82,11 +100,26 @@ function updateDOM(
 function instantiate(vNode: VNode): Instance {
   if (isVComplexNode(vNode)) {
     const { type, data, children = [] } = vNode;
-    const dom = document.createElement(type);
-    updateDOM(dom, {}, data);
-    const childInstances = children.map(instantiate);
-    childInstances.forEach(c => dom.appendChild(c.dom));
-    return { dom, element: vNode, childInstances };
+    if (typeof type === 'string') {
+      const dom = document.createElement(type);
+      updateDOM(dom, {}, data);
+      const childInstances = children.map(instantiate);
+      childInstances.forEach(c => dom.appendChild(c.dom));
+      return { dom, element: vNode, childInstances };
+    } else {
+      const publicInstance = createPublicInstance(vNode);
+      const childElement = publicInstance.render();
+      const childInstance = instantiate(childElement);
+      const dom = childInstance.dom;
+      const instance: Instance = {
+        dom,
+        childInstance,
+        element: vNode,
+        publicInstance
+      };
+      publicInstance.__internalInstance = instance;
+      return instance;
+    }
   } else {
     const node = document.createTextNode(vNode.text);
     return { dom: node, element: vNode };

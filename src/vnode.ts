@@ -1,3 +1,4 @@
+import { ComponentConstrucor } from './component';
 import { Attrs } from './modules/attrs';
 import { Classes } from './modules/class';
 import { On } from './modules/eventlistener';
@@ -8,7 +9,7 @@ export interface VNodeData {
   on?: On;
 }
 
-export type VNodeType = string;
+export type VNodeType = string | ComponentConstrucor;
 
 export interface VComplexNode {
   type: VNodeType;

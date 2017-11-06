@@ -10,5 +10,5 @@
     "jsxFactory": "h",
     "importHelpers": true
   },
-  "include": ["./src/**/*"]
+  "include": ["./src/**/*", "./__tests__/**/*"]
 }

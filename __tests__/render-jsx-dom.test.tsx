@@ -36,3 +36,21 @@ it('renders a text node', () => {
   render(element, root);
   expect(root.innerHTML).toBe('<div>hello world</div>');
 });
+
+it('renders a class', () => {
+  const element = <div class={{ hello: true, world: false }}>hello world</div>;
+  render(element, root);
+  expect(root.innerHTML).toBe('<div class="hello">hello world</div>');
+});
+
+it('renders a event listener', () => {
+  const spy = jest.fn();
+  const element = (
+    <div attrs={{ id: 'hello' }} on={{ click: spy }}>
+      hello world
+    </div>
+  );
+  render(element, root);
+  document.getElementById('hello')!.click();
+  expect(spy).toHaveBeenCalledTimes(1);
+});

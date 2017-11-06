@@ -1,4 +1,7 @@
 {
+  "lintOptions": {
+    "typeCheck": true
+  },
   "extends": ["tslint:latest", "tslint-react", "tslint-config-prettier"],
   "rules": {
     "class-name": true,

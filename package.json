@@ -24,7 +24,9 @@
   },
   "scripts": {
     "test": "jest",
-    "pretty": "prettier --write \"{src,__{tests,mocks}__}/**/*.{ts,tsx}\" \"./*.{json,js}\""
+    "pretty":
+      "prettier --write \"{src,__{tests,mocks}__}/**/*.{ts,tsx}\" \"./*.{json,js}\"",
+    "lint": "tslint --project ./tsconfig.json"
   },
   "jest": {
     "collectCoverage": true,
@@ -37,11 +39,7 @@
       ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     },
     "testRegex": "(/__tests__/.*|\\.(test|spec))\\.tsx?$",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js"
-    ],
+    "moduleFileExtensions": ["ts", "tsx", "js"],
     "mapCoverage": true
   },
   "prettier": {
