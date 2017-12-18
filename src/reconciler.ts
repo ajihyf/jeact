@@ -1,9 +1,7 @@
 import { isNil } from 'lodash';
 import { Component, createPublicInstance } from './component';
 import { updateAttrs } from './modules/attrs';
-import { updateClass } from './modules/class';
-import { updateListener } from './modules/eventlistener';
-import { isVComplexNode, VComplexNode, VNode, VNodeData } from './vnode';
+import { isVComplexNode, VComplexNode, VNode, VNodeProps } from './vnode';
 
 export interface Instance {
   dom: Node;
@@ -44,14 +42,14 @@ export function reconcile(
     if (typeof element.type === 'string') {
       updateDOM(
         instance.dom as HTMLElement,
-        instance.element.data,
-        element.data
+        instance.element.props || {},
+        element.props || {}
       );
       instance.element = element;
       instance.childInstances = reconcileChildren(instance, element);
       return instance;
     } else {
-      instance.publicInstance!.props = element.data;
+      instance.publicInstance!.props = element.props;
       const childElement = instance.publicInstance!.render();
       const oldInstance = instance.childInstance!;
       const newInstance = reconcile(parentDOM, oldInstance, childElement);
@@ -73,7 +71,8 @@ function reconcileChildren(
 ): Instance[] {
   const dom = instance.dom as HTMLElement;
   const childInstances = instance.childInstances || [];
-  const nextChildren = element.children || [];
+  const props = element.props || {};
+  const nextChildren = props.children || [];
   const newChildInstances: Instance[] = [];
   const count = Math.max(childInstances.length, nextChildren.length);
   for (let i = 0; i < count; i++) {
@@ -89,20 +88,19 @@ function reconcileChildren(
 
 function updateDOM(
   dom: HTMLElement,
-  prevData: VNodeData = {},
-  data: VNodeData = {}
+  prevData: VNodeProps,
+  data: VNodeProps
 ) {
-  updateListener(dom, prevData, data);
-  updateClass(dom, prevData, data);
   updateAttrs(dom, prevData, data);
 }
 
 function instantiate(vNode: VNode): Instance {
   if (isVComplexNode(vNode)) {
-    const { type, data, children = [] } = vNode;
+    const { type, props = {} } = vNode;
+    const children = props.children || [];
     if (typeof type === 'string') {
       const dom = document.createElement(type);
-      updateDOM(dom, {}, data);
+      updateDOM(dom, { children: [] }, props);
       const childInstances = children.map(instantiate);
       childInstances.forEach(c => dom.appendChild(c.dom));
       return { dom, element: vNode, childInstances };

@@ -1,20 +1,16 @@
 import { ComponentConstrucor } from './component';
-import { Attrs } from './modules/attrs';
-import { Classes } from './modules/class';
-import { On } from './modules/eventlistener';
 
-export interface VNodeData {
-  class?: Classes;
-  attrs?: Attrs;
-  on?: On;
+export interface VNodeProps {
+  [key: string]: any
+  className?: string
+  children?: VNode[]
 }
 
 export type VNodeType = string | ComponentConstrucor;
 
 export interface VComplexNode {
   type: VNodeType;
-  data?: VNodeData;
-  children?: VNode[];
+  props: VNodeProps;
 }
 
 export interface VTextNode {
@@ -29,18 +25,19 @@ export function isVComplexNode(vNode: VNode): vNode is VComplexNode {
 
 export function h(
   type: VNodeType,
-  config: any | null,
+  passedProps: any | null,
   ...children: Array<VNode | number | string | boolean | null>
 ): VNode {
-  const data = { ...config };
+  const props: VNodeProps = { ...passedProps };
   const rawChildren: Array<VNode | string | number> = children.filter(
     (c): c is VNode | string | number => c !== null && typeof c !== 'boolean'
   );
 
-  const mappedChildren = rawChildren.map(
+  props.children = rawChildren.map(
     c => (typeof c === 'object' ? c : createTextElement(c))
   );
-  return { type, data, children: mappedChildren };
+
+  return { type, props };
 }
 
 function createTextElement(value: string | number): VNode {

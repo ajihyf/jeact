@@ -12,8 +12,8 @@ it('renders a component', () => {
   class Foo extends Component<{}, {}> {
     public render() {
       return (
-        <div class={{ good: true, hello: false }}>
-          <a attrs={{ href: '/' }} />
+        <div className="good">
+          <a href="/" />
         </div>
       );
     }
@@ -27,8 +27,8 @@ it('renders a component with props', () => {
   class Foo extends Component<{ name: string }, {}> {
     public render() {
       return (
-        <div class={{ good: true, hello: false }}>
-          <a attrs={{ href: '/' }} />
+        <div className="good">
+          <a href="/" />
           <span>{this.props.name}</span>
         </div>
       );
@@ -50,7 +50,7 @@ it('can set state', () => {
     }
 
     public render() {
-      return <div on={{ click: this.handleClick }}>{this.state.count}</div>;
+      return <div onClick={this.handleClick}>{this.state.count}</div>;
     }
 
     private handleClick() {

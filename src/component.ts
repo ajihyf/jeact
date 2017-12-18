@@ -4,7 +4,7 @@ import { VComplexNode, VNode } from './vnode';
 export abstract class Component<
   P extends Record<string, any>,
   S extends Record<string, any>
-> {
+  > {
   public props: P;
   public state: S;
   // tslint:disable-next-line:variable-name
@@ -34,7 +34,7 @@ function updateInstance(internalInstance: Instance) {
 }
 
 export function createPublicInstance(vNode: VComplexNode): Component<any, any> {
-  const { type, data = {} } = vNode;
-  const publicInstance = new (type as ComponentConstrucor)(data);
+  const { type, props = {} } = vNode;
+  const publicInstance = new (type as ComponentConstrucor)(props);
   return publicInstance;
 }

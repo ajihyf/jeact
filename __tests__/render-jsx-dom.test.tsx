@@ -15,7 +15,7 @@ it('renders a jsx div', () => {
 });
 
 it('renders a jsx with attrs', () => {
-  const element = <div attrs={{ align: 'left' }} />;
+  const element = <div align="left" />;
   render(element, root);
   expect(root.innerHTML).toBe('<div align="left"></div>');
 });
@@ -24,7 +24,7 @@ it('renders a div with children', () => {
   const element = (
     <div>
       <span />
-      <div attrs={{ id: 'hello' }} />
+      <div id="hello" />
     </div>
   );
   render(element, root);
@@ -38,7 +38,7 @@ it('renders a text node', () => {
 });
 
 it('renders a class', () => {
-  const element = <div class={{ hello: true, world: false }}>hello world</div>;
+  const element = <div className="hello">hello world</div>;
   render(element, root);
   expect(root.innerHTML).toBe('<div class="hello">hello world</div>');
 });
@@ -46,7 +46,7 @@ it('renders a class', () => {
 it('renders a event listener', () => {
   const spy = jest.fn();
   const element = (
-    <div attrs={{ id: 'hello' }} on={{ click: spy }}>
+    <div id="hello" onClick={spy}>
       hello world
     </div>
   );

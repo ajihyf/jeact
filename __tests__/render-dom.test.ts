@@ -10,7 +10,8 @@ beforeAll(() => {
 
 it('renders a div', () => {
   const element: VNode = {
-    type: 'div'
+    type: 'div',
+    props: {}
   };
   render(element, root);
   expect(root.innerHTML).toBe('<div></div>');
@@ -19,24 +20,24 @@ it('renders a div', () => {
 it('renders a div with props', () => {
   const element: VNode = {
     type: 'div',
-    data: {
-      class: { hello: true, world: false },
-      attrs: {
-        align: 'left'
-      }
+    props: {
+      className: 'hello',
+      align: 'left'
     }
   };
   render(element, root);
-  expect(root.innerHTML).toBe('<div class="hello" align="left"></div>');
+  expect(root.innerHTML).toBe('<div align="left" class="hello"></div>');
 });
 
 it('renders a div with children', () => {
   const element: VNode = {
     type: 'div',
-    children: [
-      { type: 'span' },
-      { type: 'div', data: { attrs: { id: 'hello' } } }
-    ]
+    props: {
+      children: [
+        { type: 'span', props: {} },
+        { type: 'div', props: { id: 'hello' } }
+      ]
+    }
   };
   render(element, root);
   expect(root.innerHTML).toBe('<div><span></span><div id="hello"></div></div>');
@@ -45,7 +46,9 @@ it('renders a div with children', () => {
 it('renders a text node', () => {
   const element: VNode = {
     type: 'div',
-    children: [{ text: 'hello world' }]
+    props: {
+      children: [{ text: 'hello world' }]
+    }
   };
   render(element, root);
   expect(root.innerHTML).toBe('<div>hello world</div>');
@@ -54,16 +57,12 @@ it('renders a text node', () => {
 it('renders a node with event listener', () => {
   const element: VNode = {
     type: 'div',
-    data: {
-      attrs: {
-        id: 'root'
-      },
-      on: {
-        click: jest.fn()
-      }
+    props: {
+      id: 'root',
+      onClick: jest.fn()
     }
   };
   render(element, root);
-  document.getElementById('root').click();
-  expect(element.data.on.click).toHaveBeenCalledTimes(1);
+  document.getElementById('root')!.click();
+  expect(element.props.onClick).toHaveBeenCalledTimes(1);
 });
