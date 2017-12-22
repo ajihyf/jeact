@@ -8,7 +8,11 @@
     "noUnusedLocals": true,
     "jsx": "react",
     "jsxFactory": "h",
-    "importHelpers": true
+    "importHelpers": true,
+    "inlineSourceMap": true
   },
-  "include": ["./src/**/*", "./__tests__/**/*"]
+  "include": [
+    "./src/**/*",
+    "./__tests__/**/*"
+  ]
 }

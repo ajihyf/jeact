@@ -24,13 +24,10 @@
   },
   "scripts": {
     "test": "jest",
-    "pretty":
-      "prettier --write \"{src,__{tests,mocks}__}/**/*.{ts,tsx}\" \"./*.{json,js}\"",
+    "pretty": "prettier --write \"{src,__{tests,mocks}__}/**/*.{ts,tsx}\" \"./*.{json,js}\"",
     "lint": "tslint --project ./tsconfig.json",
-    "build:module":
-      "rollup --config ./rollup.config.js -f es -n jeact -o dist/jeact.es.js",
-    "build:main":
-      "rollup --config ./rollup.config.js -f umd -n jeact -o dist/jeact.umd.js",
+    "build:module": "rollup --config ./rollup.config.js -f es -n jeact -o dist/jeact.es.js",
+    "build:main": "rollup --config ./rollup.config.js -f umd -n jeact -o dist/jeact.umd.js",
     "build": "yarn run build:module && yarn run build:main"
   },
   "jest": {
@@ -43,8 +40,12 @@
     "transform": {
       ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     },
-    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.tsx?$",
-    "moduleFileExtensions": ["ts", "tsx", "js"],
+    "testRegex": "(/__tests__/(!_).*|\\.(test|spec))\\.tsx?$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
     "mapCoverage": true
   },
   "prettier": {

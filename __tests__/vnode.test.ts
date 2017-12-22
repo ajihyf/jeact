@@ -1,9 +1,4 @@
-import { h, isVComplexNode } from '../src/vnode';
-
-test('isVComplextNode', () => {
-  expect(isVComplexNode({ type: 'div', props: { children: [] } })).toBe(true);
-  expect(isVComplexNode({ text: 'good' })).toBe(false);
-});
+import { h, TEXT_ELEMENT } from '../src/vnode';
 
 test('createElement', () => {
   const element = h(
@@ -23,7 +18,10 @@ test('createElement', () => {
           props: {
             children: [
               {
-                text: 'world'
+                type: TEXT_ELEMENT,
+                props: {
+                  nodeValue: 'world'
+                }
               }
             ]
           }

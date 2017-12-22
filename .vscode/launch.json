@@ -5,11 +5,14 @@
       "type": "node",
       "request": "launch",
       "name": "Debug Tests",
-      "program": "${workspaceRoot}/node_modules/.bin/jest",
+      "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
       "args": [
         "--runInBand",
         "--no-cache"
-      ]
+      ],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceRoot}",
+      "sourceMaps": true
     }
   ]
 }

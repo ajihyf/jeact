@@ -1,3 +1,5 @@
+import './_browser-mock';
+// tslint:disable-next-line:ordered-imports
 import { render } from '../src/reconciler';
 import { h } from '../src/vnode';
 

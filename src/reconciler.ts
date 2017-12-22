@@ -1,89 +1,343 @@
 import { isNil } from 'lodash';
-import { Component, createPublicInstance } from './component';
+import { Component, createInstance } from './component';
 import { updateAttrs } from './modules/attrs';
-import { isVComplexNode, VComplexNode, VNode, VNodeProps } from './vnode';
+import { isHostType, TEXT_ELEMENT, VNode, VNodeProps, VNodeType } from './vnode';
 
-export interface Instance {
-  dom: Node;
-  element: VNode;
-  childInstance?: Instance;
-  childInstances?: Instance[];
-  publicInstance?: Component<any, any>;
+enum FiberTag {
+  HOST_ROOT,
+  HOST_COMPONENT,
+  CLASS_COMPONENT
 }
 
-let rootInstance: Instance | null;
-
-export function render(element: VNode, parentDOM: HTMLElement) {
-  const prevInstance = rootInstance;
-  const nextInstance = reconcile(parentDOM, prevInstance, element);
-  rootInstance = nextInstance;
+enum EffectTag {
+  PLACEMENT,
+  DELETION,
+  UPDATE
 }
 
-export function reconcile(
-  parentDOM: HTMLElement,
-  instance: Instance | undefined | null,
-  element: VNode | undefined | null
-): Instance | null {
-  if (isNil(instance)) {
-    if (!isNil(element)) {
-      const newInstance = instantiate(element);
-      parentDOM.appendChild(newInstance.dom);
-      return newInstance;
+export interface Fiber {
+  tag: FiberTag,
+  props: VNodeProps,
+  type?: VNodeType,
+  stateNode?: HTMLElement | Component,
+  parent?: Fiber,
+  child?: Fiber,
+  sibling?: Fiber,
+  alternate?: Fiber,
+  partialState?: Record<string, any>,
+  effectTag?: EffectTag,
+  effects?: Fiber[]
+}
+
+type UpdateTask = {
+  from: FiberTag.HOST_ROOT,
+  dom: HTMLElement,
+  newProps: VNodeProps,
+} | {
+    from: FiberTag.CLASS_COMPONENT,
+    instance: Component,
+    partialState: Record<string, any>
+  }
+
+interface Deadline {
+  timeRemaining: () => number
+}
+
+type RICCallback = (ddl: Deadline) => void;
+const rIC: (cb: RICCallback) => number = (window as any).requestIdleCallback;
+
+const ENOUGH_TIME = 1;
+
+const updateQueue: UpdateTask[] = [];
+
+let nextUnitOfWork: Fiber | null = null;
+let pendingCommit: Fiber | null = null;
+
+function performWork(deadline: Deadline) {
+  workLoop(deadline)
+
+  if (nextUnitOfWork || updateQueue.length > 1) {
+    rIC(performWork);
+  }
+}
+
+function workLoop(deadline: Deadline) {
+  if (!nextUnitOfWork) {
+    resetNextUnitOfWork();
+  }
+
+  while (nextUnitOfWork && deadline.timeRemaining() > ENOUGH_TIME) {
+    nextUnitOfWork = performUnitOfWork(nextUnitOfWork);
+  }
+
+  if (pendingCommit) {
+    commitAllWork(pendingCommit);
+  }
+}
+
+
+function resetNextUnitOfWork() {
+  const update = updateQueue.shift();
+
+  if (!update) {
+    return;
+  }
+
+  if (update.from === FiberTag.CLASS_COMPONENT && update.partialState) {
+    update.instance.__fiber.partialState = update.partialState;
+  }
+
+  const root: Fiber =
+    update.from === FiberTag.HOST_ROOT
+      ? (update.dom as any)._rootContainerFiber
+      : getRoot(update.instance.__fiber);
+
+  nextUnitOfWork = {
+    tag: FiberTag.HOST_ROOT,
+    stateNode: update.from === FiberTag.HOST_ROOT ? update.dom : root.stateNode,
+    props: update.from === FiberTag.HOST_ROOT ? update.newProps : root.props,
+    alternate: root
+  };
+}
+
+function getRoot(fiber: Fiber): Fiber {
+  let node = fiber;
+  while (node.parent) {
+    node = node.parent;
+  }
+  return node;
+}
+
+function performUnitOfWork(wipFiber: Fiber): Fiber | null {
+  beginWork(wipFiber);
+  if (wipFiber.child) {
+    return wipFiber.child;
+  }
+
+  let uow: Fiber | undefined = wipFiber;
+  while (uow) {
+    completeWork(uow);
+    if (uow.sibling) {
+      return uow.sibling;
     }
-    return null;
-  } else if (isNil(element)) {
-    parentDOM.removeChild(instance.dom);
-    return null;
-  } else if (
-    isVComplexNode(instance.element) &&
-    isVComplexNode(element) &&
-    instance.element.type === element.type
-  ) {
-    if (typeof element.type === 'string') {
-      updateDOM(
-        instance.dom as HTMLElement,
-        instance.element.props || {},
-        element.props || {}
-      );
-      instance.element = element;
-      instance.childInstances = reconcileChildren(instance, element);
-      return instance;
-    } else {
-      instance.publicInstance!.props = element.props;
-      const childElement = instance.publicInstance!.render();
-      const oldInstance = instance.childInstance!;
-      const newInstance = reconcile(parentDOM, oldInstance, childElement);
-      instance.dom = newInstance!.dom;
-      instance.childInstance = newInstance!;
-      instance.element = element;
-      return instance;
-    }
+    uow = uow.parent;
+  }
+
+  return null;
+}
+
+function beginWork(wipFiber: Fiber) {
+  if (wipFiber.tag === FiberTag.CLASS_COMPONENT) {
+    updateClassComponent(wipFiber);
   } else {
-    const newInstance = instantiate(element);
-    parentDOM.replaceChild(newInstance.dom, instance.dom);
-    return newInstance;
+    updateHostComponent(wipFiber);
   }
 }
 
-function reconcileChildren(
-  instance: Instance,
-  element: VComplexNode
-): Instance[] {
-  const dom = instance.dom as HTMLElement;
-  const childInstances = instance.childInstances || [];
-  const props = element.props || {};
-  const nextChildren = props.children || [];
-  const newChildInstances: Instance[] = [];
-  const count = Math.max(childInstances.length, nextChildren.length);
-  for (let i = 0; i < count; i++) {
-    const childInstance = childInstances[i];
-    const childElement = nextChildren[i];
-    const newChildInstance = reconcile(dom, childInstance, childElement);
-    if (newChildInstance !== null) {
-      newChildInstances.push(newChildInstance);
-    }
+function updateHostComponent(wipFiber: Fiber) {
+  if (!wipFiber.stateNode) {
+    wipFiber.stateNode = createDomElement(wipFiber);
   }
-  return newChildInstances;
+
+  const newChildElements = wipFiber.props.children || [];
+  reconcileChildrenArray(wipFiber, newChildElements);
+}
+
+function updateClassComponent(wipFiber: Fiber) {
+  let instance = wipFiber.stateNode as Component;
+  if (!instance) {
+    instance = wipFiber.stateNode = createInstance(wipFiber);
+  } else if (wipFiber.props === instance.props && !wipFiber.partialState) {
+    cloneChildFibers(wipFiber);
+    return;
+  }
+
+  instance.props = wipFiber.props;
+  instance.state = { ...instance.state, ...wipFiber.partialState };
+  wipFiber.partialState = undefined;
+
+  const newChildElements = instance.render();
+  reconcileChildrenArray(wipFiber, newChildElements);
+}
+
+function arrify<T>(val: T | T[]): T[] {
+  if (Array.isArray(val)) {
+    return val;
+  }
+  return [val];
+}
+
+function cloneChildFibers(parentFiber: Fiber) {
+  const oldFiber = parentFiber.alternate;
+
+  if (!oldFiber || !oldFiber.child) {
+    return;
+  }
+
+  let oldChild: Fiber | undefined = oldFiber.child;
+  let prevChild: Fiber | undefined;
+
+  while (oldChild) {
+    const newChild: Fiber = {
+      tag: oldChild.tag,
+      type: oldChild.type,
+      stateNode: oldChild.stateNode,
+      props: oldChild.props,
+      partialState: oldChild.partialState,
+      alternate: oldChild,
+      parent: parentFiber
+    };
+
+    if (prevChild) {
+      prevChild.sibling = newChild;
+    } else {
+      parentFiber.child = newChild;
+    }
+
+    prevChild = newChild;
+    oldChild = oldChild.sibling;
+  }
+}
+
+function reconcileChildrenArray(wipFiber: Fiber, newChildElements: VNode | VNode[]) {
+  const elements = arrify(newChildElements);
+
+  let index = 0;
+  let oldFiber = wipFiber.alternate ? wipFiber.alternate.child : undefined;
+  let newFiber: Fiber | undefined;
+
+  while (index < elements.length || oldFiber) {
+    const prevFiber = newFiber;
+    const element = index < elements.length ? elements[index] : null;
+    const sameType = oldFiber && element && element.type === oldFiber.type;
+
+    if (sameType) {
+      newFiber = {
+        type: oldFiber!.type,
+        tag: oldFiber!.tag,
+        stateNode: oldFiber!.stateNode,
+        props: element!.props,
+        parent: wipFiber,
+        alternate: oldFiber,
+        partialState: oldFiber!.partialState,
+        effectTag: EffectTag.UPDATE
+      };
+    }
+
+    if (element && !sameType) {
+      newFiber = {
+        type: element.type,
+        tag: isHostType(element.type) ? FiberTag.HOST_COMPONENT : FiberTag.CLASS_COMPONENT,
+        props: element.props,
+        parent: wipFiber,
+        effectTag: EffectTag.PLACEMENT
+      };
+    }
+
+    if (oldFiber && !sameType) {
+      oldFiber.effectTag = EffectTag.DELETION;
+      wipFiber.effects = wipFiber.effects || [];
+      wipFiber.effects.push(oldFiber);
+    }
+
+    if (oldFiber) {
+      oldFiber = oldFiber.sibling;
+    }
+
+    if (index === 0) {
+      wipFiber.child = newFiber;
+    } else if (prevFiber && element) {
+      prevFiber.sibling = newFiber;
+    }
+
+    index++;
+  }
+}
+
+function completeWork(fiber: Fiber) {
+  if (fiber.tag === FiberTag.CLASS_COMPONENT) {
+    (fiber.stateNode as Component).__fiber = fiber;
+  }
+
+  if (fiber.parent) {
+    const childEffects = fiber.effects || [];
+    const thisEffects = !isNil(fiber.effectTag) ? [fiber] : [];
+    const parentEffects = fiber.parent.effects || [];
+    fiber.parent.effects = [...parentEffects, ...thisEffects, ...childEffects];
+  } else {
+    pendingCommit = fiber;
+  }
+}
+
+function commitAllWork(fiber: Fiber) {
+  if (fiber.effects) {
+    fiber.effects.forEach(f => {
+      commitWork(f);
+    });
+  }
+  (fiber.stateNode as any)._rootContainerFiber = fiber;
+  nextUnitOfWork = null;
+  pendingCommit = null;
+}
+
+function commitWork(fiber: Fiber) {
+  if (fiber.tag === FiberTag.HOST_ROOT) {
+    return;
+  }
+
+  let domParentFiber = fiber.parent!;
+
+  while (domParentFiber.tag === FiberTag.CLASS_COMPONENT) {
+    domParentFiber = domParentFiber.parent!;
+  }
+
+  const domParent = domParentFiber.stateNode as HTMLElement;
+
+  if (fiber.effectTag === EffectTag.PLACEMENT && fiber.tag === FiberTag.HOST_COMPONENT) {
+    domParent.appendChild(fiber.stateNode as HTMLElement);
+  } else if (fiber.effectTag === EffectTag.UPDATE) {
+    updateDOM(fiber.stateNode as HTMLElement, fiber.alternate!.props, fiber.props)
+  } else if (fiber.effectTag === EffectTag.DELETION) {
+    commitDeletion(fiber, domParent);
+  }
+}
+
+function commitDeletion(fiber: Fiber, domParent: HTMLElement) {
+  let node = fiber;
+  while (true) {
+    if (node.tag === FiberTag.CLASS_COMPONENT) {
+      node = node.child!;
+      continue;
+    }
+    domParent.removeChild(node.stateNode as HTMLElement);
+    while (node !== fiber && !node.sibling) {
+      node = node.parent!;
+    }
+    if (node === fiber) {
+      return;
+    }
+    node = node.sibling!;
+  }
+}
+
+export function render(elements: VNode | VNode[], containerDom: HTMLElement) {
+  updateQueue.push({
+    from: FiberTag.HOST_ROOT,
+    dom: containerDom,
+    newProps: {
+      children: arrify(elements)
+    }
+  });
+  rIC(performWork);
+}
+
+export function scheduleUpdate(instance: Component, partialState: Record<string, any>) {
+  updateQueue.push({
+    from: FiberTag.CLASS_COMPONENT,
+    instance,
+    partialState
+  });
+  rIC(performWork);
 }
 
 function updateDOM(
@@ -94,32 +348,13 @@ function updateDOM(
   updateAttrs(dom, prevData, data);
 }
 
-function instantiate(vNode: VNode): Instance {
-  if (isVComplexNode(vNode)) {
-    const { type, props = {} } = vNode;
-    const children = props.children || [];
-    if (typeof type === 'string') {
-      const dom = document.createElement(type);
-      updateDOM(dom, { children: [] }, props);
-      const childInstances = children.map(instantiate);
-      childInstances.forEach(c => dom.appendChild(c.dom));
-      return { dom, element: vNode, childInstances };
-    } else {
-      const publicInstance = createPublicInstance(vNode);
-      const childElement = publicInstance.render();
-      const childInstance = instantiate(childElement);
-      const dom = childInstance.dom;
-      const instance: Instance = {
-        dom,
-        childInstance,
-        element: vNode,
-        publicInstance
-      };
-      publicInstance.__internalInstance = instance;
-      return instance;
-    }
-  } else {
-    const node = document.createTextNode(vNode.text);
-    return { dom: node, element: vNode };
+function createDomElement(fiber: Fiber): HTMLElement {
+  if (!fiber.type || !isHostType(fiber.type)) {
+    throw new Error('Fiber must have a host type');
   }
+  const dom = fiber.type === TEXT_ELEMENT
+    ? document.createTextNode('')
+    : document.createElement(fiber.type);
+  updateDOM(dom as HTMLElement, {}, fiber.props);
+  return dom as HTMLElement;
 }

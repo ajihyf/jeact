@@ -7,6 +7,11 @@ export function updateAttrs(
   prevProps: VNodeProps,
   nextProps: VNodeProps
 ) {
+  if (dom.nodeType === document.TEXT_NODE) {
+    dom.nodeValue = nextProps.nodeValue;
+    return;
+  }
+
   if (!prevProps && !nextProps) return;
   if (prevProps === nextProps) return;
 

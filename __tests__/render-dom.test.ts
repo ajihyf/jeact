@@ -1,5 +1,7 @@
+import './_browser-mock';
+// tslint:disable-next-line:ordered-imports
 import { render } from '../src/reconciler';
-import { VNode } from '../src/vnode';
+import { TEXT_ELEMENT, VNode } from '../src/vnode';
 
 let root: HTMLElement;
 
@@ -47,7 +49,7 @@ it('renders a text node', () => {
   const element: VNode = {
     type: 'div',
     props: {
-      children: [{ text: 'hello world' }]
+      children: [{ type: TEXT_ELEMENT, props: { nodeValue: 'hello world' } }]
     }
   };
   render(element, root);
