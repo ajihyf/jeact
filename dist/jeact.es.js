@@ -1,4 +1,41 @@
-import { isNil } from 'lodash';
+/**
+ * Checks if `value` is `null` or `undefined`.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is nullish, else `false`.
+ * @example
+ *
+ * _.isNil(null);
+ * // => true
+ *
+ * _.isNil(void 0);
+ * // => true
+ *
+ * _.isNil(NaN);
+ * // => false
+ */
+function isNil(value) {
+  return value == null;
+}
+
+var isNil_1 = isNil;
+
+var FiberTag;
+(function (FiberTag) {
+    FiberTag[FiberTag["HOST_ROOT"] = 0] = "HOST_ROOT";
+    FiberTag[FiberTag["HOST_COMPONENT"] = 1] = "HOST_COMPONENT";
+    FiberTag[FiberTag["CLASS_COMPONENT"] = 2] = "CLASS_COMPONENT";
+})(FiberTag || (FiberTag = {}));
+var EffectTag;
+(function (EffectTag) {
+    EffectTag[EffectTag["PLACEMENT"] = 0] = "PLACEMENT";
+    EffectTag[EffectTag["DELETION"] = 1] = "DELETION";
+    EffectTag[EffectTag["UPDATE"] = 2] = "UPDATE";
+})(EffectTag || (EffectTag = {}));
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation. All rights reserved.
@@ -14,11 +51,6 @@ MERCHANTABLITY OR NON-INFRINGEMENT.
 See the Apache Version 2.0 License for specific language governing permissions
 and limitations under the License.
 ***************************************************************************** */
-/* global Reflect, Promise */
-
-
-
-
 
 function __rest(s, e) {
     var t = {};
@@ -95,6 +127,16 @@ function updateAttrs(dom, prevProps, nextProps) {
     }
 }
 
+const rIC = window
+    .requestIdleCallback;
+
+function arrify(val) {
+    if (Array.isArray(val)) {
+        return val;
+    }
+    return [val];
+}
+
 const TEXT_ELEMENT = 1;
 function isHostType(vNodeType) {
     return vNodeType === TEXT_ELEMENT || typeof vNodeType === 'string';
@@ -102,26 +144,19 @@ function isHostType(vNodeType) {
 function h(type, passedProps, ...children) {
     const props = Object.assign({}, passedProps);
     const rawChildren = children.filter((c) => c !== null && typeof c !== 'boolean');
-    props.children = rawChildren.map(c => (typeof c === 'object' ? c : createTextElement(c)));
+    props.children = rawChildren.map(c => typeof c === 'object' ? c : createTextElement(c));
     return { type, props };
 }
 function createTextElement(value) {
     return { type: TEXT_ELEMENT, props: { nodeValue: value.toString() } };
 }
 
-var FiberTag;
-(function (FiberTag) {
-    FiberTag[FiberTag["HOST_ROOT"] = 0] = "HOST_ROOT";
-    FiberTag[FiberTag["HOST_COMPONENT"] = 1] = "HOST_COMPONENT";
-    FiberTag[FiberTag["CLASS_COMPONENT"] = 2] = "CLASS_COMPONENT";
-})(FiberTag || (FiberTag = {}));
-var EffectTag;
-(function (EffectTag) {
-    EffectTag[EffectTag["PLACEMENT"] = 0] = "PLACEMENT";
-    EffectTag[EffectTag["DELETION"] = 1] = "DELETION";
-    EffectTag[EffectTag["UPDATE"] = 2] = "UPDATE";
-})(EffectTag || (EffectTag = {}));
-const rIC = window.requestIdleCallback;
+function createInstance(fiber) {
+    const { type, props = {} } = fiber;
+    const publicInstance = new type(props);
+    publicInstance.__fiber = fiber;
+    return publicInstance;
+}
 const ENOUGH_TIME = 1;
 const updateQueue = [];
 let nextUnitOfWork = null;
@@ -213,12 +248,6 @@ function updateClassComponent(wipFiber) {
     const newChildElements = instance.render();
     reconcileChildrenArray(wipFiber, newChildElements);
 }
-function arrify(val) {
-    if (Array.isArray(val)) {
-        return val;
-    }
-    return [val];
-}
 function cloneChildFibers(parentFiber) {
     const oldFiber = parentFiber.alternate;
     if (!oldFiber || !oldFiber.child) {
@@ -270,7 +299,9 @@ function reconcileChildrenArray(wipFiber, newChildElements) {
         if (element && !sameType) {
             newFiber = {
                 type: element.type,
-                tag: isHostType(element.type) ? FiberTag.HOST_COMPONENT : FiberTag.CLASS_COMPONENT,
+                tag: isHostType(element.type)
+                    ? FiberTag.HOST_COMPONENT
+                    : FiberTag.CLASS_COMPONENT,
                 props: element.props,
                 parent: wipFiber,
                 effectTag: EffectTag.PLACEMENT
@@ -299,7 +330,7 @@ function completeWork(fiber) {
     }
     if (fiber.parent) {
         const childEffects = fiber.effects || [];
-        const thisEffects = !isNil(fiber.effectTag) ? [fiber] : [];
+        const thisEffects = !isNil_1(fiber.effectTag) ? [fiber] : [];
         const parentEffects = fiber.parent.effects || [];
         fiber.parent.effects = [...parentEffects, ...thisEffects, ...childEffects];
     }
@@ -326,7 +357,8 @@ function commitWork(fiber) {
         domParentFiber = domParentFiber.parent;
     }
     const domParent = domParentFiber.stateNode;
-    if (fiber.effectTag === EffectTag.PLACEMENT && fiber.tag === FiberTag.HOST_COMPONENT) {
+    if (fiber.effectTag === EffectTag.PLACEMENT &&
+        fiber.tag === FiberTag.HOST_COMPONENT) {
         domParent.appendChild(fiber.stateNode);
     }
     else if (fiber.effectTag === EffectTag.UPDATE) {
@@ -393,12 +425,6 @@ class Component {
         scheduleUpdate(this, partialState);
     }
 }
-function createInstance(fiber) {
-    const { type, props = {} } = fiber;
-    const publicInstance = new type(props);
-    publicInstance.__fiber = fiber;
-    return publicInstance;
-}
 
 var jeact = {
     h,
@@ -406,5 +432,5 @@ var jeact = {
     render
 };
 
-export { Component, render, h };
 export default jeact;
+export { Component, render, h };

@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es2017",
-    "module": "commonjs",
+    "module": "es2015",
     "moduleResolution": "node",
     "strictNullChecks": true,
     "noImplicitAny": true,
@@ -9,10 +9,9 @@
     "jsx": "react",
     "jsxFactory": "h",
     "importHelpers": true,
-    "inlineSourceMap": true
+    "inlineSourceMap": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
   },
-  "include": [
-    "./src/**/*",
-    "./__tests__/**/*"
-  ]
+  "include": ["./src/**/*", "./__tests__/**/*"]
 }

@@ -1,4 +1,5 @@
-import { Fiber, scheduleUpdate } from './reconciler';
+import { Fiber } from './fiber';
+import { scheduleUpdate } from './reconciler';
 import { VNode } from './vnode';
 
 export abstract class Component<
@@ -23,11 +24,4 @@ export abstract class Component<
 
 export interface ComponentConstrucor {
   new <P>(props: P): Component<P, any>;
-}
-
-export function createInstance(fiber: Fiber): Component {
-  const { type, props = {} } = fiber;
-  const publicInstance = new (type as ComponentConstrucor)(props);
-  publicInstance.__fiber = fiber;
-  return publicInstance;
 }

@@ -1,45 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jeact - Hello World</title>
+  </head>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jeact - Hello World</title>
-</head>
+  <body>
+    <div id="root"></div>
+    <script src="../dist/jeact.umd.js"></script>
+    <script>
+      const root = document.getElementById('root');
+      class App extends jeact.Component {
+        constructor(props) {
+          super(props);
 
-<body>
-  <div id="root"></div>
-  <script src="https://unpkg.com/lodash"></script>
-  <script>
-    lodash = _;
-  </script>
-  <script src="../dist/jeact.umd.js"></script>
-  <script>
-    const root = document.getElementById("root");
-    class App extends jeact.Component {
-      constructor(props) {
-        super(props);
+          this.handleClick = this.handleClick.bind(this);
+          this.state = { count: 0 };
+        }
 
-        this.handleClick = this.handleClick.bind(this);
-        this.state = { count: 0 };
+        render() {
+          return jeact.h(
+            'div',
+            null,
+            jeact.h('button', { onClick: this.handleClick }, 'click me'),
+            `world: you have clicked ${this.state.count} times.`
+          );
+        }
+
+        handleClick() {
+          this.setState({ count: this.state.count + 1 });
+        }
       }
-
-      render() {
-        return jeact.h(
-          'div', null,
-          jeact.h('button', { onClick: this.handleClick }, 'click me'),
-          `world: you have clicked ${this.state.count} times.`
-        );
-      }
-
-
-      handleClick() {
-        this.setState({ count: this.state.count + 1 });
-      }
-    }
-    const element = jeact.h(App, { name: "World" });
-    jeact.render(element, root);
-  </script>
-</body>
-
+      const element = jeact.h(App, { name: 'World' });
+      jeact.render(element, root);
+    </script>
+  </body>
 </html>

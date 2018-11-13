@@ -1,38 +1,16 @@
-import { isNil } from 'lodash';
-import { Component, createInstance } from './component';
+import isNil from 'lodash/isNil';
+import { Component, ComponentConstrucor } from './component';
+import { EffectTag, Fiber, FiberTag } from './fiber';
 import { updateAttrs } from './modules/attrs';
-import {
-  isHostType,
-  TEXT_ELEMENT,
-  VNode,
-  VNodeProps,
-  VNodeType
-} from './vnode';
+import { Deadline, rIC } from './ric';
+import { arrify } from './utils';
+import { isHostType, TEXT_ELEMENT, VNode, VNodeProps } from './vnode';
 
-enum FiberTag {
-  HOST_ROOT,
-  HOST_COMPONENT,
-  CLASS_COMPONENT
-}
-
-enum EffectTag {
-  PLACEMENT,
-  DELETION,
-  UPDATE
-}
-
-export interface Fiber {
-  tag: FiberTag;
-  props: VNodeProps;
-  type?: VNodeType;
-  stateNode?: HTMLElement | Component;
-  parent?: Fiber;
-  child?: Fiber;
-  sibling?: Fiber;
-  alternate?: Fiber;
-  partialState?: Record<string, any>;
-  effectTag?: EffectTag;
-  effects?: Fiber[];
+export function createInstance(fiber: Fiber): Component {
+  const { type, props = {} } = fiber;
+  const publicInstance = new (type as ComponentConstrucor)(props);
+  publicInstance.__fiber = fiber;
+  return publicInstance;
 }
 
 type UpdateTask =
@@ -46,13 +24,6 @@ type UpdateTask =
       instance: Component;
       partialState: Record<string, any>;
     };
-
-interface Deadline {
-  timeRemaining: () => number;
-}
-
-type RICCallback = (ddl: Deadline) => void;
-const rIC: (cb: RICCallback) => number = (window as any).requestIdleCallback;
 
 const ENOUGH_TIME = 1;
 
@@ -165,13 +136,6 @@ function updateClassComponent(wipFiber: Fiber) {
 
   const newChildElements = instance.render();
   reconcileChildrenArray(wipFiber, newChildElements);
-}
-
-function arrify<T>(val: T | T[]): T[] {
-  if (Array.isArray(val)) {
-    return val;
-  }
-  return [val];
 }
 
 function cloneChildFibers(parentFiber: Fiber) {

@@ -13,11 +13,12 @@
     "prettier": "^1.7.4",
     "rimraf": "^2.6.2",
     "rollup": "^0.67.1",
+    "rollup-plugin-commonjs": "^9.2.0",
+    "rollup-plugin-node-resolve": "^3.4.0",
     "rollup-plugin-typescript2": "^0.18.0",
     "ts-jest": "^23.10.4",
     "tslint": "^5.8.0",
     "tslint-config-prettier": "^1.6.0",
-    "tslint-plugin-prettier": "^2.0.1",
     "tslint-react": "^3.2.0",
     "typescript": "^3.1.6"
   },
@@ -38,19 +39,18 @@
     "collectCoverage": true,
     "globals": {
       "ts-jest": {
-        "skipBabel": true
+        "babelConfig": false
       }
     },
     "transform": {
-      ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+      ".(ts|tsx)": "ts-jest"
     },
     "testRegex": "(/__tests__/(!_).*|\\.(test|spec))\\.tsx?$",
     "moduleFileExtensions": [
       "ts",
       "tsx",
       "js"
-    ],
-    "mapCoverage": true
+    ]
   },
   "lint-staged": {
     "*.{ts,tsx}": [
