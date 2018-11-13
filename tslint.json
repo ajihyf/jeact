@@ -2,8 +2,10 @@
   "lintOptions": {
     "typeCheck": true
   },
+  "rulesDirectory": ["tslint-plugin-prettier"],
   "extends": ["tslint:latest", "tslint-react", "tslint-config-prettier"],
   "rules": {
+    "prettier": true,
     "class-name": true,
     "curly": [true, "ignore-same-line"],
     "eofline": true,

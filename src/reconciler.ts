@@ -1,7 +1,13 @@
 import { isNil } from 'lodash';
 import { Component, createInstance } from './component';
 import { updateAttrs } from './modules/attrs';
-import { isHostType, TEXT_ELEMENT, VNode, VNodeProps, VNodeType } from './vnode';
+import {
+  isHostType,
+  TEXT_ELEMENT,
+  VNode,
+  VNodeProps,
+  VNodeType
+} from './vnode';
 
 enum FiberTag {
   HOST_ROOT,
@@ -16,31 +22,33 @@ enum EffectTag {
 }
 
 export interface Fiber {
-  tag: FiberTag,
-  props: VNodeProps,
-  type?: VNodeType,
-  stateNode?: HTMLElement | Component,
-  parent?: Fiber,
-  child?: Fiber,
-  sibling?: Fiber,
-  alternate?: Fiber,
-  partialState?: Record<string, any>,
-  effectTag?: EffectTag,
-  effects?: Fiber[]
+  tag: FiberTag;
+  props: VNodeProps;
+  type?: VNodeType;
+  stateNode?: HTMLElement | Component;
+  parent?: Fiber;
+  child?: Fiber;
+  sibling?: Fiber;
+  alternate?: Fiber;
+  partialState?: Record<string, any>;
+  effectTag?: EffectTag;
+  effects?: Fiber[];
 }
 
-type UpdateTask = {
-  from: FiberTag.HOST_ROOT,
-  dom: HTMLElement,
-  newProps: VNodeProps,
-} | {
-    from: FiberTag.CLASS_COMPONENT,
-    instance: Component,
-    partialState: Record<string, any>
-  }
+type UpdateTask =
+  | {
+      from: FiberTag.HOST_ROOT;
+      dom: HTMLElement;
+      newProps: VNodeProps;
+    }
+  | {
+      from: FiberTag.CLASS_COMPONENT;
+      instance: Component;
+      partialState: Record<string, any>;
+    };
 
 interface Deadline {
-  timeRemaining: () => number
+  timeRemaining: () => number;
 }
 
 type RICCallback = (ddl: Deadline) => void;
@@ -54,7 +62,7 @@ let nextUnitOfWork: Fiber | null = null;
 let pendingCommit: Fiber | null = null;
 
 function performWork(deadline: Deadline) {
-  workLoop(deadline)
+  workLoop(deadline);
 
   if (nextUnitOfWork || updateQueue.length > 1) {
     rIC(performWork);
@@ -74,7 +82,6 @@ function workLoop(deadline: Deadline) {
     commitAllWork(pendingCommit);
   }
 }
-
 
 function resetNextUnitOfWork() {
   const update = updateQueue.shift();
@@ -199,7 +206,10 @@ function cloneChildFibers(parentFiber: Fiber) {
   }
 }
 
-function reconcileChildrenArray(wipFiber: Fiber, newChildElements: VNode | VNode[]) {
+function reconcileChildrenArray(
+  wipFiber: Fiber,
+  newChildElements: VNode | VNode[]
+) {
   const elements = arrify(newChildElements);
 
   let index = 0;
@@ -227,7 +237,9 @@ function reconcileChildrenArray(wipFiber: Fiber, newChildElements: VNode | VNode
     if (element && !sameType) {
       newFiber = {
         type: element.type,
-        tag: isHostType(element.type) ? FiberTag.HOST_COMPONENT : FiberTag.CLASS_COMPONENT,
+        tag: isHostType(element.type)
+          ? FiberTag.HOST_COMPONENT
+          : FiberTag.CLASS_COMPONENT,
         props: element.props,
         parent: wipFiber,
         effectTag: EffectTag.PLACEMENT
@@ -293,10 +305,17 @@ function commitWork(fiber: Fiber) {
 
   const domParent = domParentFiber.stateNode as HTMLElement;
 
-  if (fiber.effectTag === EffectTag.PLACEMENT && fiber.tag === FiberTag.HOST_COMPONENT) {
+  if (
+    fiber.effectTag === EffectTag.PLACEMENT &&
+    fiber.tag === FiberTag.HOST_COMPONENT
+  ) {
     domParent.appendChild(fiber.stateNode as HTMLElement);
   } else if (fiber.effectTag === EffectTag.UPDATE) {
-    updateDOM(fiber.stateNode as HTMLElement, fiber.alternate!.props, fiber.props)
+    updateDOM(
+      fiber.stateNode as HTMLElement,
+      fiber.alternate!.props,
+      fiber.props
+    );
   } else if (fiber.effectTag === EffectTag.DELETION) {
     commitDeletion(fiber, domParent);
   }
@@ -331,7 +350,10 @@ export function render(elements: VNode | VNode[], containerDom: HTMLElement) {
   rIC(performWork);
 }
 
-export function scheduleUpdate(instance: Component, partialState: Record<string, any>) {
+export function scheduleUpdate(
+  instance: Component,
+  partialState: Record<string, any>
+) {
   updateQueue.push({
     from: FiberTag.CLASS_COMPONENT,
     instance,
@@ -340,11 +362,7 @@ export function scheduleUpdate(instance: Component, partialState: Record<string,
   rIC(performWork);
 }
 
-function updateDOM(
-  dom: HTMLElement,
-  prevData: VNodeProps,
-  data: VNodeProps
-) {
+function updateDOM(dom: HTMLElement, prevData: VNodeProps, data: VNodeProps) {
   updateAttrs(dom, prevData, data);
 }
 
@@ -352,9 +370,10 @@ function createDomElement(fiber: Fiber): HTMLElement {
   if (!fiber.type || !isHostType(fiber.type)) {
     throw new Error('Fiber must have a host type');
   }
-  const dom = fiber.type === TEXT_ELEMENT
-    ? document.createTextNode('')
-    : document.createElement(fiber.type);
+  const dom =
+    fiber.type === TEXT_ELEMENT
+      ? document.createTextNode('')
+      : document.createElement(fiber.type);
   updateDOM(dom as HTMLElement, {}, fiber.props);
   return dom as HTMLElement;
 }

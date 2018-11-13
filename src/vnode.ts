@@ -1,9 +1,9 @@
 import { ComponentConstrucor } from './component';
 
 export interface VNodeProps {
-  [key: string]: any
-  className?: string
-  children?: VNode[]
+  [key: string]: any;
+  className?: string;
+  children?: VNode[];
 }
 
 export const TEXT_ELEMENT: 1 = 1;
@@ -15,7 +15,9 @@ export interface VNode {
   props: VNodeProps;
 }
 
-export function isHostType(vNodeType: VNodeType): vNodeType is typeof TEXT_ELEMENT | string {
+export function isHostType(
+  vNodeType: VNodeType
+): vNodeType is typeof TEXT_ELEMENT | string {
   return vNodeType === TEXT_ELEMENT || typeof vNodeType === 'string';
 }
 
@@ -29,8 +31,8 @@ export function h(
     (c): c is VNode | string | number => c !== null && typeof c !== 'boolean'
   );
 
-  props.children = rawChildren.map(
-    c => (typeof c === 'object' ? c : createTextElement(c))
+  props.children = rawChildren.map(c =>
+    typeof c === 'object' ? c : createTextElement(c)
   );
 
   return { type, props };
