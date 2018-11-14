@@ -1,7 +1,5 @@
 import { VNodeProps } from '../vnode';
 
-export type Attrs = Record<string, any>;
-
 export function updateAttrs(
   dom: Element,
   prevProps: VNodeProps,
