@@ -1,11 +1,15 @@
 import { VNodeProps } from '../vnode';
 
+function isText(dom: HTMLElement | Text): dom is Text {
+  return dom.nodeType === document.TEXT_NODE;
+}
+
 export function updateAttrs(
-  dom: Element,
+  dom: HTMLElement | Text,
   prevProps: VNodeProps,
   nextProps: VNodeProps
 ) {
-  if (dom.nodeType === document.TEXT_NODE) {
+  if (isText(dom)) {
     if (nextProps.nodeValue !== prevProps.nodeValue) {
       dom.nodeValue = nextProps.nodeValue;
     }

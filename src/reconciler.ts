@@ -275,7 +275,7 @@ function commitWork(fiber: Fiber) {
   ) {
     domParent.appendChild(fiber.stateNode as HTMLElement);
   } else if (fiber.effectTag === EffectTag.UPDATE) {
-    updateDOM(
+    updateAttrs(
       fiber.stateNode as HTMLElement,
       fiber.alternate!.props,
       fiber.props
@@ -326,10 +326,6 @@ export function scheduleUpdate(
   rIC(performWork);
 }
 
-function updateDOM(dom: HTMLElement, prevData: VNodeProps, data: VNodeProps) {
-  updateAttrs(dom, prevData, data);
-}
-
 function createDomElement(fiber: Fiber): HTMLElement {
   if (!fiber.type || !isHostType(fiber.type)) {
     throw new Error('Fiber must have a host type');
@@ -338,6 +334,6 @@ function createDomElement(fiber: Fiber): HTMLElement {
     fiber.type === TEXT_ELEMENT
       ? document.createTextNode('')
       : document.createElement(fiber.type);
-  updateDOM(dom as HTMLElement, {}, fiber.props);
+  updateAttrs(dom, {}, fiber.props);
   return dom as HTMLElement;
 }
