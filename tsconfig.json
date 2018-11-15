@@ -9,9 +9,8 @@
     "jsx": "react",
     "jsxFactory": "h",
     "importHelpers": true,
-    "inlineSourceMap": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true
   },
-  "include": ["./src/**/*", "./__tests__/**/*"]
+  "include": ["./src/**/*", "./__tests__/**/*", "./__mocks__/**/*"]
 }

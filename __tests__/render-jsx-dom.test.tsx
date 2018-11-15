@@ -1,4 +1,4 @@
-import './_browser-mock';
+import '../__mocks__/_browser-mock';
 // tslint:disable-next-line:ordered-imports
 import { render } from '../src/reconciler';
 import { h } from '../src/vnode';
@@ -20,6 +20,18 @@ it('renders a jsx with attrs', () => {
   const element = <div align="left" />;
   render(element, root);
   expect(root.innerHTML).toBe('<div align="left"></div>');
+});
+
+it('renders element with true value', () => {
+  render(<input enabled={true} />, root);
+
+  expect(root.innerHTML).toBe('<input enabled="">');
+});
+
+it('renders element with false value', () => {
+  render(<input enabled={false} />, root);
+
+  expect(root.innerHTML).toBe('<input>');
 });
 
 it('renders a div with children', () => {

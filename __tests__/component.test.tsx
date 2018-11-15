@@ -1,5 +1,5 @@
 // tslint:disable:max-classes-per-file
-import './_browser-mock';
+import '../__mocks__/_browser-mock';
 // tslint:disable-next-line:ordered-imports
 import { Component, h, render } from '../src/jeact';
 
