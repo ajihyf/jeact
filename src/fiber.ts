@@ -26,3 +26,9 @@ export interface Fiber {
   effectTag?: EffectTag;
   effects?: Fiber[];
 }
+
+declare global {
+  interface HTMLElement {
+    _rootContainerFiber: Fiber;
+  }
+}

@@ -67,7 +67,7 @@ function resetNextUnitOfWork() {
 
   const root: Fiber =
     update.from === FiberTag.HOST_ROOT
-      ? (update.dom as any)._rootContainerFiber
+      ? update.dom._rootContainerFiber
       : getRoot(update.instance.__fiber);
 
   nextUnitOfWork = {
@@ -251,7 +251,7 @@ function commitAllWork(fiber: Fiber) {
       commitWork(f);
     });
   }
-  (fiber.stateNode as any)._rootContainerFiber = fiber;
+  fiber.stateNode!._rootContainerFiber = fiber;
   nextUnitOfWork = null;
   pendingCommit = null;
 }
