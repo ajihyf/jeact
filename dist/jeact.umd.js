@@ -68,8 +68,11 @@
       return t;
   }
 
+  function isText(dom) {
+      return dom.nodeType === document.TEXT_NODE;
+  }
   function updateAttrs(dom, prevProps, nextProps) {
-      if (dom.nodeType === document.TEXT_NODE) {
+      if (isText(dom)) {
           if (nextProps.nodeValue !== prevProps.nodeValue) {
               dom.nodeValue = nextProps.nodeValue;
           }
@@ -133,8 +136,7 @@
       }
   }
 
-  const rIC = window
-      .requestIdleCallback;
+  const rIC = window.requestIdleCallback;
 
   function arrify(val) {
       if (Array.isArray(val)) {
@@ -368,7 +370,7 @@
           domParent.appendChild(fiber.stateNode);
       }
       else if (fiber.effectTag === EffectTag.UPDATE) {
-          updateDOM(fiber.stateNode, fiber.alternate.props, fiber.props);
+          updateAttrs(fiber.stateNode, fiber.alternate.props, fiber.props);
       }
       else if (fiber.effectTag === EffectTag.DELETION) {
           commitDeletion(fiber, domParent);
@@ -409,9 +411,6 @@
       });
       rIC(performWork);
   }
-  function updateDOM(dom, prevData, data) {
-      updateAttrs(dom, prevData, data);
-  }
   function createDomElement(fiber) {
       if (!fiber.type || !isHostType(fiber.type)) {
           throw new Error('Fiber must have a host type');
@@ -419,7 +418,7 @@
       const dom = fiber.type === TEXT_ELEMENT
           ? document.createTextNode('')
           : document.createElement(fiber.type);
-      updateDOM(dom, {}, fiber.props);
+      updateAttrs(dom, {}, fiber.props);
       return dom;
   }
 

@@ -11,7 +11,7 @@ export abstract class Component<
   // tslint:disable-next-line:variable-name
   public __fiber: Fiber;
   // tslint:disable-next-line:variable-name
-  public _rootContainerFiber?: Fiber;
+  public _rootContainerFiber: Fiber;
 
   constructor(props: P) {
     this.props = props;

@@ -62,8 +62,11 @@ function __rest(s, e) {
     return t;
 }
 
+function isText(dom) {
+    return dom.nodeType === document.TEXT_NODE;
+}
 function updateAttrs(dom, prevProps, nextProps) {
-    if (dom.nodeType === document.TEXT_NODE) {
+    if (isText(dom)) {
         if (nextProps.nodeValue !== prevProps.nodeValue) {
             dom.nodeValue = nextProps.nodeValue;
         }
@@ -127,8 +130,7 @@ function updateAttrs(dom, prevProps, nextProps) {
     }
 }
 
-const rIC = window
-    .requestIdleCallback;
+const rIC = window.requestIdleCallback;
 
 function arrify(val) {
     if (Array.isArray(val)) {
@@ -362,7 +364,7 @@ function commitWork(fiber) {
         domParent.appendChild(fiber.stateNode);
     }
     else if (fiber.effectTag === EffectTag.UPDATE) {
-        updateDOM(fiber.stateNode, fiber.alternate.props, fiber.props);
+        updateAttrs(fiber.stateNode, fiber.alternate.props, fiber.props);
     }
     else if (fiber.effectTag === EffectTag.DELETION) {
         commitDeletion(fiber, domParent);
@@ -403,9 +405,6 @@ function scheduleUpdate(instance, partialState) {
     });
     rIC(performWork);
 }
-function updateDOM(dom, prevData, data) {
-    updateAttrs(dom, prevData, data);
-}
 function createDomElement(fiber) {
     if (!fiber.type || !isHostType(fiber.type)) {
         throw new Error('Fiber must have a host type');
@@ -413,7 +412,7 @@ function createDomElement(fiber) {
     const dom = fiber.type === TEXT_ELEMENT
         ? document.createTextNode('')
         : document.createElement(fiber.type);
-    updateDOM(dom, {}, fiber.props);
+    updateAttrs(dom, {}, fiber.props);
     return dom;
 }
 
